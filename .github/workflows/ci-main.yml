@@ -39,28 +39,28 @@ jobs:
               run: go test ./... -v -cover
 
     build-and-push:
-        name: Build and Push Image
-        needs: [lint, test]
-        runs-on: ubuntu-latest
-        steps: 
-            - name: Checkout code
-              uses: actions/checkout@v3
-
-            - name: Login to Github Registry
-              uses: docker/login-action@v3
-              with:
-                registry: ghcr.io
-                username: ${{ github.repository_owner }}
-                password: ${{ secrets.AUTH_GITHUB_TOKEN }}
-
-            - name: Build Image & Push
-              uses: docker/build.push.action@v6
-              with:
-                context: .
-                push: trie
-                tags: |
-                    ghcr.io/${{ github.repository_owner }}/${{ vars.Image_Name }}/latest
-                    ghcr.io/${{ github.repository_owner }}/${{ vars.Image_Name }}/${{github.sha}}
+      name: Build and Push Docker Image
+      runs-on: ubuntu-latest
+      needs: [lint, test]
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+  
+        - name: Login to Github Container Registry
+          uses: docker/login-action@v3
+          with:
+            registry: ghcr.io
+            username: ${{ github.repository_owner }}
+            password: ${{ secrets.AUTH_GITHUB_TOKEN }}
+  
+        - name: Build and Push Docker Image
+          uses: docker/build-push-action@v6
+          with:
+            context: .
+            push: true
+            tags: |
+              ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:latest
+              ghcr.io/${{ github.repository_owner }}/${{ vars.IMAGE_NAME }}:${{ github.sha }}
 
     deploy:
       name: Deploy to Server
